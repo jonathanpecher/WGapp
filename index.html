@@ -20,7 +20,6 @@ html,body{background:var(--bg);color:var(--tp);font-family:var(--font);min-heigh
 .app{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 .topbar{padding:52px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0}
 .topbar h1{font-size:13px;font-weight:500;color:var(--ts);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
-.topbar .wk{font-size:22px;font-weight:600;letter-spacing:-.5px}
 .notif{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ts);font-size:16px;transition:border-color .2s}
 .notif:hover{border-color:var(--accent)}
 .tabs{display:flex;gap:0;margin:20px 16px 0;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rs);padding:4px;flex-shrink:0}
@@ -41,7 +40,6 @@ html,body{background:var(--bg);color:var(--tp);font-family:var(--font);min-heigh
 .ptrack{background:var(--bg-el);border-radius:99px;height:4px;overflow:hidden}
 .pfill{height:100%;background:var(--accent);border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
 .pfill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 6px var(--accent)}
-.sstrip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .sstrip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .sbox{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rs);padding:14px 12px;text-align:center}
 .sbox.acc .n{color:var(--accent)}
@@ -127,14 +125,16 @@ html,body{background:var(--bg);color:var(--tp);font-family:var(--font);min-heigh
 .swap-mname{font-size:15px;font-weight:500;flex:1}
 .swap-cur-badge{font-size:10px;font-family:var(--mono);background:var(--adim);color:var(--accent);padding:3px 8px;border-radius:99px}
 .wrow{display:flex;gap:6px;margin-bottom:4px}
-.dpill{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 0;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg-card)}
-.dpill.today{background:var(--accent);border-color:var(--accent)}
-.dpill.today .dname,.dpill.today .dnum{color:#0a0a0a}
+.dpill{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 0;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg-card);cursor:pointer;transition:all .25s cubic-bezier(0.4, 0, 0.2, 1)}
+.dpill.today{background:var(--bg-el);border-color:#333}
+.dpill.active-filter{background:var(--accent) !important;border-color:var(--accent) !important}
+.dpill.active-filter .dname, .dpill.active-filter .dnum{color:#0a0a0a !important}
+.dpill.active-filter .ddot{background:#0a0a0a !important;opacity:0.5}
 .dname{font-size:9px;font-weight:600;color:var(--tm);text-transform:uppercase;letter-spacing:.06em}
 .dnum{font-size:14px;font-weight:500;font-family:var(--mono)}
 .ddot{width:4px;height:4px;border-radius:50%;background:transparent}
 .dpill.has-t .ddot{background:var(--accent);opacity:.6}
-.dpill.today.has-t .ddot{background:#0a0a0a;opacity:.5}
+.dpill.today.has-t .ddot{background:var(--accent);opacity:.8}
 .rank-list{display:flex;flex-direction:column;gap:8px}
 .rank-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg-el);border-radius:var(--rs);border:1px solid var(--border)}
 .rank-item.rank-1{border-color:rgba(200,241,53,.3);background:var(--adim2)}
@@ -169,6 +169,11 @@ html,body{background:var(--bg);color:var(--tp);font-family:var(--font);min-heigh
 .thist-status.open{color:var(--tm)}
 .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--accent);color:#0a0a0a;font-weight:600;font-size:13px;padding:12px 24px;border-radius:99px;white-space:nowrap;transition:transform .35s cubic-bezier(.4,0,.2,1);z-index:300;pointer-events:none;font-family:var(--mono)}
 .toast.show{transform:translateX(-50%) translateY(0)}
+.wk-controls{display:flex;align-items:center;gap:6px;margin-top:6px}
+.wk-btn{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card);color:var(--ts);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.wk-btn:hover{border-color:var(--accent);color:var(--accent)}
+.wk-reset{background:var(--adim);border:1px solid var(--accent);color:var(--accent);font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:var(--mono);margin-left:6px;transition:all .2s}
+.wk-reset:hover{opacity:.8}
 </style>
 </head>
 <body>
@@ -176,7 +181,12 @@ html,body{background:var(--bg);color:var(--tp);font-family:var(--font);min-heigh
   <div class="topbar">
     <div>
       <h1>WG Zuhause</h1>
-      <div class="wk" id="wk-label">KW 23</div>
+      <div class="wk-controls">
+        <button class="wk-btn" onclick="changeWeek(-1)">←</button>
+        <div class="wk" id="wk-label" style="font-size:20px;font-weight:600;letter-spacing:-.5px;min-width:64px;text-align:center">KW 23</div>
+        <button class="wk-btn" onclick="changeWeek(1)">→</button>
+        <button id="global-reset-btn" class="wk-reset" onclick="resetToToday()" style="display:none">Heute ↺</button>
+      </div>
     </div>
     <button class="notif">🔔</button>
   </div>
@@ -204,7 +214,7 @@ html,body{background:var(--bg);color:var(--tp);font-family:var(--font);min-heigh
         <div class="sbox acc"><div class="n" id="st-done">0</div><div class="l">Erledigt</div></div>
         <div class="sbox"><div class="n" id="st-open">5</div><div class="l">Offen</div></div>
       </div>
-      <div class="slbl">Diese Woche</div>
+      <div class="slbl" id="day-strip-lbl">Diese Woche</div>
       <div class="wrow" id="wrow"></div>
       <div class="slbl">Mitglieder</div>
       <div class="mrow" id="mrow"></div>
@@ -372,8 +382,31 @@ let state=(()=>{
     const r=sessionStorage.getItem(SK);
     if(r) return JSON.parse(r);
   }catch(e){}
-  return {tasks:JSON.parse(JSON.stringify(DEF_TASKS)),shop:JSON.parse(JSON.stringify(DEF_SHOP)),history:[]};
+  return {history:[]};
 })();
+
+// Multi-Week Initialisierung & Migration
+if (!state.currentWeek) state.currentWeek = 'KW 23';
+if (!state.tasksByWeek) state.tasksByWeek = {};
+if (!state.shopByWeek) state.shopByWeek = {};
+if (!state.tasksByWeek[state.currentWeek]) state.tasksByWeek[state.currentWeek] = JSON.parse(JSON.stringify(DEF_TASKS));
+if (!state.shopByWeek[state.currentWeek]) state.shopByWeek[state.currentWeek] = JSON.parse(JSON.stringify(DEF_SHOP));
+
+let selectedDayFilter = null;
+
+function getActiveTasks() {
+  if (!state.tasksByWeek[state.currentWeek]) {
+    state.tasksByWeek[state.currentWeek] = JSON.parse(JSON.stringify(DEF_TASKS));
+  }
+  return state.tasksByWeek[state.currentWeek];
+}
+
+function getActiveShop() {
+  if (!state.shopByWeek[state.currentWeek]) {
+    state.shopByWeek[state.currentWeek] = JSON.parse(JSON.stringify(DEF_SHOP));
+  }
+  return state.shopByWeek[state.currentWeek];
+}
 
 if(state.history.length===0){
   ['Anna','Fabienne','Tammo','Jonathan'].forEach((n,i)=>{
@@ -399,18 +432,67 @@ function switchTab(i){
   if(i===2){renderStats()}
 }
 
-let filterM=null;
+function getDayNumberForWeek(weekStr, dayIdx) {
+  const weekNum = parseInt(weekStr.replace('KW ', ''));
+  const diffWeeks = weekNum - 23;
+  const targetDate = new Date(2026, 5, 1); // KW 23 beginnt am 1. Juni 2026
+  targetDate.setDate(targetDate.getDate() + (diffWeeks * 7) + dayIdx);
+  return targetDate.getDate();
+}
+
+function changeWeek(dir) {
+  let currentNum = parseInt(state.currentWeek.replace('KW ', ''));
+  currentNum += dir;
+  state.currentWeek = 'KW ' + currentNum;
+  save();
+  updateWeekUI();
+}
+
+function toggleDayFilter(dayIdx) {
+  if (selectedDayFilter === dayIdx) {
+    selectedDayFilter = null;
+  } else {
+    selectedDayFilter = dayIdx;
+  }
+  updateWeekUI();
+}
+
+function resetToToday() {
+  state.currentWeek = 'KW 23';
+  selectedDayFilter = null;
+  save();
+  updateWeekUI();
+}
+
+function updateWeekUI() {
+  document.getElementById('wk-label').textContent = state.currentWeek;
+  
+  // Zeige Reset-Button an, wenn nicht in aktueller Woche oder ein Tag gefiltert ist
+  const isModified = state.currentWeek !== 'KW 23' || selectedDayFilter !== null;
+  document.getElementById('global-reset-btn').style.display = isModified ? 'inline-block' : 'none';
+  
+  // Titel über den Tagen anpassen
+  document.getElementById('day-strip-lbl').textContent = state.currentWeek === 'KW 23' ? 'Diese Woche' : state.currentWeek;
+  
+  renderAufgaben();
+  renderShop();
+  if(currentTab === 2) renderStats();
+}
+
 function renderAufgaben(){
   const wr=document.getElementById('wrow');wr.innerHTML='';
   DAYS.forEach((d,i)=>{
-    const h=true;
+    const h=getActiveTasks().some(t=>t.dueDay===i);
+    const isSelected = selectedDayFilter === i;
     const el=document.createElement('div');
-    el.className='dpill'+(i===TODAY?' today':'')+(h?' has-t':'');
-    el.innerHTML=`<span class="dname">${d}</span><span class="dnum">${26+i}</span><span class="ddot"></span>`;
+    el.className='dpill'+(i===TODAY && state.currentWeek==='KW 23'?' today':'')+(isSelected?' active-filter':'')+(h?' has-t':'');
+    el.innerHTML=`<span class="dname">${d}</span><span class="dnum">${getDayNumberForWeek(state.currentWeek, i)}</span><span class="ddot"></span>`;
+    el.onclick = () => toggleDayFilter(i);
     wr.appendChild(el);
   });
-  const done=state.tasks.filter(t=>isDone(t)).length;
-  const total=state.tasks.length;
+  
+  const done=getActiveTasks().filter(t=>isDone(t)).length;
+  const total=getActiveTasks().length;
   const pct=total===0?0:Math.round(done/total*100);
   document.getElementById('hp').innerHTML=`${pct}<span>%</span>`;
   document.getElementById('hb').textContent=`${done}/${total}`;
@@ -418,31 +500,49 @@ function renderAufgaben(){
   document.getElementById('st-total').textContent=total;
   document.getElementById('st-done').textContent=done;
   document.getElementById('st-open').textContent=total-done;
+  
   const mr=document.getElementById('mrow');mr.innerHTML='';
   MEMBERS.forEach(m=>{
-    const cnt=state.tasks.filter(t=>t.assignee===m.id&&!isDone(t)).length;
+    const cnt=getActiveTasks().filter(t=>t.assignee===m.id&&!isDone(t)).length;
     const el=document.createElement('div');
     el.className='mchip'+(filterM===m.id?' active':'');
     el.innerHTML=`<div class="mav" style="background:${m.bg};color:${m.color}">${m.init}</div><div class="mname">${m.name}</div><div class="mcnt">${cnt} offen</div>`;
-    el.onclick=()=>{filterM=filterM===m.id?null:m.id;document.getElementById('tlbl').textContent=filterM?`${mb(filterM).name}s Aufgaben`:'Aufgaben';renderAufgaben()};
+    el.onclick=()=>{
+      filterM=filterM===m.id?null:m.id;
+      let baseTitle = filterM ? `${mb(filterM).name}s Aufgaben` : 'Aufgaben';
+      document.getElementById('tlbl').textContent = selectedDayFilter !== null ? `${baseTitle} (${DAYS[selectedDayFilter]})` : baseTitle;
+      renderAufgaben();
+    };
     mr.appendChild(el);
   });
+  
   const tl=document.getElementById('tlist');tl.innerHTML='';
-  const shown=filterM?state.tasks.filter(t=>t.assignee===filterM):state.tasks;
+  let shown=filterM?getActiveTasks().filter(t=>t.assignee===filterM):getActiveTasks();
+  
+  // Wende Tagesfilter an
+  if (selectedDayFilter !== null) {
+    shown = shown.filter(t => t.dueDay === selectedDayFilter);
+    let baseTitle = filterM ? `${mb(filterM).name}s Aufgaben` : 'Aufgaben';
+    document.getElementById('tlbl').textContent = `${baseTitle} (${DAYS[selectedDayFilter]})`;
+  } else {
+    let baseTitle = filterM ? `${mb(filterM).name}s Aufgaben` : 'Aufgaben';
+    document.getElementById('tlbl').textContent = baseTitle;
+  }
+  
   shown.forEach(t=>tl.appendChild(makeTaskCard(t,false)));
 }
 
 let filterSM=null;
 function renderShop(){
-  const done=state.shop.filter(t=>isDone(t)).length;
-  const total=state.shop.length;
+  const done=getActiveShop().filter(t=>isDone(t)).length;
+  const total=getActiveShop().length;
   const pct=total===0?0:Math.round(done/total*100);
   document.getElementById('shp').innerHTML=`${pct}<span style="color:var(--ts)">%</span>`;
   document.getElementById('shb').textContent=`${done}/${total}`;
   document.getElementById('spf').style.width=pct+'%';
   const mr=document.getElementById('smrow');mr.innerHTML='';
   MEMBERS.forEach(m=>{
-    const cnt=state.shop.filter(t=>t.assignee===m.id&&!isDone(t)).length;
+    const cnt=getActiveShop().filter(t=>t.assignee===m.id&&!isDone(t)).length;
     const el=document.createElement('div');
     el.className='mchip'+(filterSM===m.id?' active':'');
     el.innerHTML=`<div class="mav" style="background:${m.bg};color:${m.color}">${m.init}</div><div class="mname">${m.name}</div><div class="mcnt">${cnt} offen</div>`;
@@ -450,7 +550,12 @@ function renderShop(){
     mr.appendChild(el);
   });
   const sl=document.getElementById('slist');sl.innerHTML='';
-  const shown=filterSM?state.shop.filter(t=>t.assignee===filterSM):state.shop;
+  let shown=filterSM?getActiveShop().filter(t=>t.assignee===filterSM):getActiveShop();
+  
+  if (selectedDayFilter !== null) {
+    shown = shown.filter(t => t.dueDay === selectedDayFilter);
+  }
+  
   shown.forEach(t=>sl.appendChild(makeTaskCard(t,true)));
 }
 
@@ -490,7 +595,7 @@ function makeTaskCard(task,isShop){
 }
 
 let openId=null,openIsShop=false;
-function getTask(id,isShop){return(isShop?state.shop:state.tasks).find(t=>t.id===id)}
+function getTask(id,isShop){return(isShop?getActiveShop():getActiveTasks()).find(t=>t.id===id)}
 
 function openDetail(id,isShop){
   openId=id;openIsShop=isShop;
@@ -590,7 +695,7 @@ const HIST_WEEKS=['KW 21','KW 22'];
 
 function renderStats(){
   const scores=MEMBERS.map(m=>{
-    const myTasks=[...state.tasks,...state.shop].filter(t=>t.assignee===m.id);
+    const myTasks=[...getActiveTasks(),...getActiveShop()].filter(t=>t.assignee===m.id);
     const done=myTasks.filter(t=>isDone(t)).length;
     const total=myTasks.length;
     return{m,done,total,pts:done*10};
@@ -620,7 +725,7 @@ function renderHist(){
   MEMBERS.forEach(m=>{
     let done,total;
     if(isCurrentWeek){
-      const myTasks=[...state.tasks,...state.shop].filter(t=>t.assignee===m.id);
+      const myTasks=[...getActiveTasks(),...getActiveShop()].filter(t=>t.assignee===m.id);
       done=myTasks.filter(t=>isDone(t)).length;
       total=myTasks.length;
     }else{
@@ -635,7 +740,7 @@ function renderHist(){
     hg.appendChild(el);
   });
   const tg=document.getElementById('task-hist-grid');tg.innerHTML='';
-  const allT=[...state.tasks,...state.shop];
+  const allT=[...getActiveTasks(),...getActiveShop()];
   allT.forEach(t=>{
     const m=mb(t.assignee);
     const done=isCurrentWeek?isDone(t):(Math.random()>0.4);
