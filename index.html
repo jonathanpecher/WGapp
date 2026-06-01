@@ -42,8 +42,8 @@ html,body{background:var(--bg);color:var(--tp);font-family:var(--font);min-heigh
 .pfill{height:100%;background:var(--accent);border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
 .pfill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 6px var(--accent)}
 .sstrip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.sstrip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .sbox{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rs);padding:14px 12px;text-align:center}
-.sbox .n{font-size:22px;font-weight:600;font-family:var(--mono)}
 .sbox.acc .n{color:var(--accent)}
 .sbox .l{font-size:10px;color:var(--ts);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
 .slbl{font-size:11px;font-weight:500;color:var(--tm);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;margin-top:16px}
@@ -403,7 +403,7 @@ let filterM=null;
 function renderAufgaben(){
   const wr=document.getElementById('wrow');wr.innerHTML='';
   DAYS.forEach((d,i)=>{
-    const h=state.tasks.some(t=>t.dueDay===i);
+    const h=true;
     const el=document.createElement('div');
     el.className='dpill'+(i===TODAY?' today':'')+(h?' has-t':'');
     el.innerHTML=`<span class="dname">${d}</span><span class="dnum">${26+i}</span><span class="ddot"></span>`;
@@ -459,7 +459,7 @@ function makeTaskCard(task,isShop){
   const req=reqSubs(task).length;
   const dr=doneReq(task);
   const allDone=isDone(task);
-  const isOverdue=!allDone&&task.dueDay<TODAY;
+  const isOverdue=!allDone&&(isShop ? task.dueDay < TODAY : TODAY === 6);
   const pct=req===0?0:Math.round(dr/req*100);
   const badge=allDone
     ?`<span class="badge bdone">✓ Fertig</span>`
@@ -477,7 +477,7 @@ function makeTaskCard(task,isShop){
           <span class="mini-av" style="background:${m.bg};color:${m.color}">${m.init}</span>
           ${m.name}
         </span>
-        <span class="tday">${DAYS[task.dueDay]}</span>
+        <span class="tday">${isShop ? DAYS[task.dueDay] : 'Mo - So'}</span>
         ${badge}
       </div>
       ${!allDone&&dr>0?`<div class="subprog"><div class="sptrack"><div class="spfill" style="width:${pct}%"></div></div><span class="splbl">${pct}%</span></div>`:''}
@@ -513,7 +513,7 @@ function renderDetail(){
   const pct=req===0?0:Math.round(dr/req*100);
   document.getElementById('sh-emoji').textContent=task.icon;
   document.getElementById('sh-title').textContent=task.title;
-  document.getElementById('sh-sub').innerHTML=`<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:16px;height:16px;border-radius:50%;background:${m.bg};color:${m.color};font-size:8px;font-family:var(--mono);font-weight:600;display:inline-flex;align-items:center;justify-content:center">${m.init}</span>${m.name} · ${DAYS[task.dueDay]}</span>`;
+  document.getElementById('sh-sub').innerHTML=`<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:16px;height:16px;border-radius:50%;background:${m.bg};color:${m.color};font-size:8px;font-family:var(--mono);font-weight:600;display:inline-flex;align-items:center;justify-content:center">${m.init}</span>${m.name} · ${openIsShop ? DAYS[task.dueDay] : 'Mo - So'}</span>`;
   const body=document.getElementById('sh-body');body.innerHTML='';
   task.groups.forEach(g=>{
     const gd=document.createElement('div');gd.className='subgroup';
